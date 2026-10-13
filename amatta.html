@@ -1,7 +1,6 @@
 <title>아 마따!</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=IBM+Plex+Mono:wght@400;500&family=Nanum+Pen+Script&display=swap">
 <style>
-[hidden] { display: none !important; }
 /* Layout: 책상 위에 펼친 노트 한 장. 탭으로 상황을 나누고, 줄 노트처럼 항목을 한 줄씩 쓴다. 맨 아래 줄이 다음 항목을 쓰는 줄이다. */
 :root {
   --desk: #E8E5DD;
@@ -37,16 +36,16 @@ button { font: inherit; color: inherit; cursor: pointer; }
 :focus-visible { outline: 2px solid var(--pen); outline-offset: 2px; }
 
 /* 머리말 */
-.top { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; padding-inline: 4px; }
-@media (max-width: 640px) { .top .acts { grid-column: 1 / -1; justify-content: flex-start; } }
-h1 { display: flex; align-items: center; flex-wrap: wrap; margin: 0; justify-content: center; grid-column: 1 / -1; font-family: var(--font-hand); font-weight: 400; font-size: 40px; line-height: 1.05; color: var(--pen); }
+.top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 12px; padding-inline: 4px; }
+@media (max-width: 640px) { .top .acts { flex: 0 0 100%; justify-content: flex-start; } }
+h1 { display: flex; align-items: center; flex-wrap: wrap; margin: 0; justify-content: center; flex: 0 0 100%; font-family: var(--font-hand); font-weight: 400; font-size: 40px; line-height: 1.05; color: var(--pen); }
 h1 .vv { display: inline-block; transform: rotate(8deg); color: var(--red); margin-left: 1px; }
 h1 .thumb { display: inline-block; vertical-align: middle; margin-left: 4px; }
 h1 .thumb img { height: 92px; width: auto; display: block; transform: rotate(-7deg); filter: drop-shadow(0 2px 3px rgba(0,0,0,.28)); }
 h1 .thumb.left { margin: 0 6px 0 0; }
 h1 .thumb.left img { height: 88px; transform: rotate(5deg); }
 @media (max-width: 480px) { h1 { padding: 0; } h1 .thumb img { height: 74px; } h1 .thumb.left img { height: 70px; } }
-.status { margin-top: 10px; font: 13px/1.4 var(--font-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.status { margin-top: 10px; white-space: nowrap; font: 13px/1.4 var(--font-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
 .ghost { background: transparent; border: 1px solid var(--rule); border-radius: 999px; padding: 6px 14px; font-size: 14px; color: var(--muted); min-height: 36px; }
 .ghost:hover { color: var(--ink); border-color: var(--muted); }
 .tpl { background: var(--paper); border: 1px dashed var(--rule); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
@@ -155,18 +154,6 @@ pre.plain { margin: 0; white-space: pre-wrap; font: 13px/1.5 var(--font-mono); b
 .step .t { flex: 1; min-width: 0; font-size: 14.5px; overflow-wrap: anywhere; }
 .step.done .t { color: var(--muted); }
 .step .time { font: 12px var(--font-mono); color: var(--muted); white-space: nowrap; }
-.step-row { display: flex; align-items: center; gap: 6px; }
-.step-row .step { flex: 1; min-width: 0; }
-.step-tools { display: flex; gap: 2px; flex: 0 0 auto; }
-.step-tools .x { width: 30px; }
-.step-add { width: 100%; display: flex; flex-direction: column; gap: 8px; padding: 8px 0; }
-.step-add textarea, .note-input { width: 100%; min-height: 72px; resize: vertical; }
-.suggestions { width: 100%; border: 1px dashed var(--rule); border-radius: 8px; padding: 10px; }
-.suggestions p { margin: 0 0 6px; }
-.suggestions label { display: flex; gap: 8px; align-items: flex-start; padding: 5px 0; }
-.check-warning { width: 100%; padding: 10px; border: 1px solid var(--red); border-radius: 8px; color: var(--red); }
-.evidence { width: 100%; padding-top: 6px; }
-.evidence p { margin: 4px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .sprog { font: 12.5px var(--font-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
 .aibtn { background: transparent; border: 1px dashed var(--pen); color: var(--pen); border-radius: 999px; padding: 4px 14px; min-height: 36px; font-size: 13.5px; font-weight: 700; }
 .aibtn:hover { background: color-mix(in srgb, var(--pen) 10%, transparent); }
@@ -183,7 +170,7 @@ pre.plain { margin: 0; white-space: pre-wrap; font: 13px/1.5 var(--font-mono); b
 /* 큰 화면: 외출이나 자리를 비울 때 폰에서 크게 눌러 확인하는 모드 */
 .bigbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 14px; background: var(--paper); border: 1.5px solid var(--rule); border-radius: 12px; font-size: 18px; }
 .bigbar.done { border-color: var(--pen); color: var(--pen); }
-body.big .top, body.big #tplPanel, body.big #missPanel, body.big #histPanel, body.big #postsPanel, body.big #helpPanel, body.big #editBtn, body.big #bigBtn, body.big #addRow,
+body.big .top, body.big #tplPanel, body.big #missPanel, body.big #histPanel, body.big #editBtn, body.big #bigBtn, body.big #addRow,
 body.big #privacy, body.big #keyHint, body.big .stepsbox, body.big .posts, body.big #syncNote, body.big #foot, body.big #summary { display: none; }
 body.big .tab { font-size: 17px; min-height: 52px; padding-inline: 18px; }
 body.big .item { grid-template-columns: 56px minmax(0, 1fr); gap: 4px 14px; padding: 20px 0; }
@@ -198,8 +185,18 @@ body.big .undo { min-height: 48px; font-size: 15px; }
 body.big .chip { min-height: 44px; font-size: 15px; }
 body.big .btn.small { min-height: 52px; font-size: 17px; padding-inline: 24px; }
 body.big .tally { font-size: 15px; }
+.stepli { display: flex; align-items: center; gap: 2px; }
+.stepli .step { flex: 1; min-width: 0; }
+.x.sdel { flex: 0 0 auto; width: 30px; height: 30px; font-size: 16px; opacity: .55; }
+.x.sdel:hover { opacity: 1; }
+.stepform { display: flex; gap: 8px; align-items: center; width: 100%; flex-wrap: wrap; }
+.stepform .field { flex: 1 1 220px; }
+#aiNote { padding-inline: 8px; }
+.stepsbox .row2 .undo { font-size: 12.5px; opacity: .55; min-height: 32px; padding-block: 4px; }
+.item:hover .stepsbox .undo, .stepsbox .undo:focus-visible { opacity: 1; }
+@media (hover: none) { .stepsbox .row2 .undo { opacity: .8; } }
 .keys { display: none; }
-.keys { display: none !important; }
+@media (hover: hover) and (pointer: fine) { .keys { display: block; } }
 .field { font: inherit; color: var(--ink); background: transparent; border: 0; border-bottom: 1.5px dashed var(--rule); padding: 8px 2px; border-radius: 0; min-width: 0; }
 .field:focus { outline: none; border-bottom-color: var(--pen); }
 .field.grow { flex: 1 1 200px; }
@@ -251,12 +248,11 @@ body.big .tally { font-size: 15px; }
     <div class="status" id="status">불러오는 중…</div>
     <div class="acts">
       <button class="ghost" id="aiBtn" type="button" aria-pressed="true" hidden>AI 개입 켬</button>
-      <button class="ghost" id="missBtn" type="button" aria-expanded="false">빠뜨림</button>
+      <button class="ghost" id="aiStepsBtn" type="button" hidden title="세부사항이 없는 항목 전부에 AI가 확인 기준을 씁니다">AI 확인 기준</button>
       <button class="ghost" id="histBtn" type="button" aria-expanded="false">기록</button>
+      <button class="ghost" id="missBtn" type="button" aria-expanded="false">빠뜨림</button>
       <button class="ghost" id="tplBtn" type="button" aria-expanded="false">템플릿</button>
-      <button class="ghost" id="postsBtn" type="button" aria-expanded="false">공고 관리</button>
-      <button class="ghost" id="timeBtn" type="button" aria-pressed="false">시간 측정 끔</button>
-      <button class="ghost" id="helpBtn" type="button" aria-expanded="false">도움말</button>
+      <button class="ghost" id="modeBtn" type="button" aria-pressed="false" title="곁가지 기능을 접거나 펼칩니다">전체 보기</button>
     </div>
   </div>
 
@@ -271,12 +267,8 @@ body.big .tally { font-size: 15px; }
   </div>
   <div class="tpl" id="histPanel" hidden></div>
   <div class="tpl" id="tplPanel" hidden></div>
-  <div class="tpl" id="postsPanel" hidden></div>
-  <div class="tpl" id="helpPanel" hidden>
-    <p><strong>사용 순서</strong>: 항목 추가 → 필요한 세부사항 추가 → 세부사항 확인 → 전체 체크 → 필요할 때만 재확인 기록 → 하루 끝.</p>
-    <p>단축키: j/k 이동 · x 체크 · r 다시 확인 · f 시간 측정 끝 · z 체크 취소 · e 수정 · n 새 항목 · 1~4 탭 · Esc 선택 해제</p>
-  </div>
 
+  <p class="hint" id="aiNote" role="status" aria-live="polite" hidden></p>
   <div class="tabrow">
     <div class="tabs" id="tabs" role="tablist" aria-label="상황별 목록"></div>
     <button class="ghost" id="bigBtn" type="button" aria-pressed="false">큰 화면</button>
@@ -290,8 +282,8 @@ body.big .tally { font-size: 15px; }
       <button class="btn pen" id="addBtn" type="button">추가</button>
     </div>
   </div>
-  <p class="hint" id="privacy">AI 기능을 누를 때 항목과 관련 기록이 Claude로 전송됩니다. 개인정보, 비밀번호, 고객 이름은 적지 마세요.</p>
-  <p class="hint keys" id="keyHint"></p>
+  <p class="hint" id="privacy">항목 글은 재확인 때 Claude로 전송됩니다. 개인정보, 비밀번호, 고객 이름은 적지 마세요.</p>
+  <p class="hint keys" id="keyHint">단축키: j/k 이동 · x 체크 · r 다시 확인 · f 끝 · z 체크 취소 · e 수정 · n 새 항목 · 1~4 탭 · Esc 선택 해제</p>
 
   <div class="foot" id="foot"></div>
   <div id="summary"></div>
@@ -349,16 +341,17 @@ body.big .tally { font-size: 15px; }
   var copyFallback = "";
   var copyNote = "";
   var stepMsg = {};          // itemId -> 세부 확인 만들기 상태 글
-  var stepAddOpen = {};      // itemId -> 직접 입력창 열림 여부
-  var stepDrafts = {};       // itemId -> 줄바꿈으로 입력한 세부사항
-  var stepSuggestions = {};  // itemId -> AI가 제안한 추가 기준
-  var stepEditing = null;    // { itemId, stepId }
-  var checkWarnId = null;
-  var evidenceOpen = {};
   var postMsg = {};          // 공고 키 -> 체크리스트 만들기 상태 글
   var analysisMsg = null;    // { status, text }
   var misses = [];           // 빠뜨림 기록(날짜를 넘어 계속 쌓는다): { id, text, at, dayId?, itemId?, linked }
   var missOpen = false;
+  var fullMode = false;      // 전체 보기: 곁가지 기능(빠뜨림, 템플릿, 큰 화면, 소요 시간, 단축키 안내)을 펼친다
+  try { fullMode = localStorage.getItem("am_full") === "1"; } catch (e) {}
+  var addingStepFor = null;  // 세부사항 입력칸이 열려 있는 항목
+  var focusStepFor = null;
+  var aiNote = "";           // AI 확인 기준 일괄 작성 상태 글
+  var aiBusy = false;
+  var aiNoteTimer = null;
   var bigMode = false;
   var prevTab = "all";
   var editMode = false;     // 편집 모드에서만 순서 바꾸기, 수정, 삭제가 보인다
@@ -367,8 +360,6 @@ body.big .tally { font-size: 15px; }
   var selId = null;          // 키보드로 고른 항목
   var scrollSel = false;
   var histOpen = false;
-  var postsPanelOpen = false;
-  var helpOpen = false;
   var histDays = null;       // [{ st, stats }] 최신순
   var histNote = "";
 
@@ -398,7 +389,7 @@ body.big .tally { font-size: 15px; }
   function pad(n) { return n < 10 ? "0" + n : "" + n; }
   function hms(iso) { var d = new Date(iso); return pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds()); }
   function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
-  function freshDay() { return { id: uid(), startedAt: new Date().toISOString(), endedAt: null, timeTracking: false, items: [], events: [] }; }
+  function freshDay() { return { id: uid(), startedAt: new Date().toISOString(), endedAt: null, items: [], events: [] }; }
   function groupName(id) { var g = GROUPS.filter(function (x) { return x.id === id; })[0]; return g ? g.name : GROUPS[0].name; }
   function groupOf(item) { return item.group || "work"; }
 
@@ -450,9 +441,7 @@ body.big .tally { font-size: 15px; }
     var c = reasonCounts(), parts = [];
     REASONS.forEach(function (r) { if (c[r.id]) parts.push(r.name + " " + c[r.id] + "회"); });
     var line = parts.length ? "재확인 이유(표시한 것만): " + parts.join(", ") + (c.none ? ", 표시 안 함 " + c.none + "회" : "") + "." : "재확인 이유를 표시한 것이 없습니다.";
-    if (c.trust) line += " '기록을 못 믿겠음'으로 표시한 기록이 " + c.trust + "회 있습니다.";
-    var notes = state.events.filter(function (e) { return e.type === "recheck" && e.reasonNote; }).map(function (e) { return e.reasonNote; });
-    if (notes.length) line += " 직접 적은 이유: " + notes.join(" / ") + ".";
+    if (c.trust) line += " '기록을 못 믿겠음'이 " + c.trust + "회 있어요. 기록을 남겼는데도 믿지 못한 재확인이라서, 이런 재확인이 많으면 원인이 기록 부족보다 불안 쪽일 수 있다는 참고 신호예요.";
     return line;
   }
   function reasonNode(ev) {
@@ -463,10 +452,6 @@ body.big .tally { font-size: 15px; }
         onclick: function () { ev.reason = ev.reason === r.id ? undefined : r.id; if (!ev.reason) delete ev.reason; save(); render(); }
       }, r.name));
     });
-    wrap.appendChild(h("input", {
-      class: "field grow", type: "text", maxlength: "80", value: ev.reasonNote || "", placeholder: "직접 적기 (선택, 80자 이내)", "aria-label": "재확인 이유 직접 적기",
-      oninput: function () { ev.reasonNote = this.value.trim().slice(0, 80); if (!ev.reasonNote) delete ev.reasonNote; save(); }
-    }));
     return wrap;
   }
   function findItem(id) { return state.items.filter(function (i) { return i.id === id; })[0]; }
@@ -488,32 +473,6 @@ body.big .tally { font-size: 15px; }
     state.events.push({ itemId: item.id, type: stepOn(item.id, s.id) ? "unstep" : "step", stepId: s.id, at: new Date().toISOString() });
     save(); render();
   }
-  function addManualSteps(item, text) {
-    var existing = (item.steps || []).map(function (s) { return s.text.trim().toLowerCase(); });
-    var added = 0;
-    String(text || "").split(/\r?\n/).map(function (t) { return t.trim(); }).filter(Boolean).forEach(function (t) {
-      if (existing.indexOf(t.toLowerCase()) >= 0) return;
-      item.steps.push({ id: uid(), text: t.slice(0, 100), source: "manual", createdAt: new Date().toISOString() });
-      existing.push(t.toLowerCase()); added++;
-    });
-    return added;
-  }
-  function moveStep(item, stepId, dir) {
-    var i = item.steps.findIndex(function (s) { return s.id === stepId; }), j = i + dir;
-    if (i < 0 || j < 0 || j >= item.steps.length || state.endedAt) return;
-    var tmp = item.steps[i]; item.steps[i] = item.steps[j]; item.steps[j] = tmp; save(); render();
-  }
-  function removeStep(item, stepId) {
-    if (state.endedAt) return;
-    item.steps = item.steps.filter(function (s) { return s.id !== stepId; });
-    save(); render();
-  }
-  function commitStepEdit(item, stepId, text) {
-    var s = item.steps.filter(function (x) { return x.id === stepId; })[0];
-    text = String(text || "").trim(); stepEditing = null;
-    if (s && text && !state.endedAt) { s.text = text.slice(0, 100); save(); }
-    render();
-  }
   function totals() {
     var checks = state.items.filter(function (i) { return checkOf(i.id); }).length;
     var rechecks = state.events.filter(function (e) { return e.type === "recheck"; }).length;
@@ -522,10 +481,12 @@ body.big .tally { font-size: 15px; }
     state.events.forEach(function (e) { if (e.type === "recheck" && typeof e.sec === "number") { secs += e.sec; timed++; } });
     return { checks: checks, rechecks: rechecks, rechecked: items, secs: secs, timed: timed };
   }
+  // 하루치 숫자를 훑어보는 참고일 뿐, 효과를 판정하지 않는다. 기준 숫자는 임의로 정한 값이다.
   function verdict(t) {
-    if (t.rechecked.length >= 5 || t.rechecks >= 10) return { cls: "bad", text: "오늘은 기록 후 재확인이 여러 번 있었습니다. 기록만으로 이유를 단정할 수는 없습니다." };
-    if (t.rechecked.length <= 2 && t.rechecks <= 3) return { cls: "ok", text: "오늘은 기록 후 재확인이 적었습니다. 며칠 더 기록하면 변화 추이를 확인할 수 있습니다." };
-    return { cls: "", text: "오늘은 재확인이 중간 범위였습니다. 같은 방식으로 며칠 더 기록해 보세요." };
+    var ai = state.aiOff ? "AI 개입 없이 기록만 남긴 하루예요." : "AI 개입을 켠 하루라서 기록 때문인지 AI 때문인지는 가를 수 없어요.";
+    if (t.rechecked.length >= 5 || t.rechecks >= 10) return { cls: "bad", text: "오늘은 재확인이 많은 편이었어요. 기록을 남긴 뒤에도 다시 확인한 항목이 있었어요. 이유 칩을 같이 보면 왜 그랬는지 단서가 돼요. 하루치라 단정하긴 일러요." };
+    if (t.rechecked.length <= 2 && t.rechecks <= 3) return { cls: "ok", text: "오늘은 재확인이 적은 편이었어요. " + ai + " 하루치라 효과라고 말하긴 일러요." };
+    return { cls: "", text: "오늘은 보통이었어요. 며칠 더 쌓이면 흐름이 보여요." };
   }
 
   /* ---------- 사람인 스크랩 공고 ---------- */
@@ -659,12 +620,11 @@ body.big .tally { font-size: 15px; }
   }
   function setSync(failed) {
     var t = {
-      db: "내 Claude 계정에 저장됨",
-      local: "이 브라우저에만 저장됨",
-      memory: "저장되지 않음 — 탭을 닫으면 기록이 사라집니다"
+      db: "저장: 내 Claude 계정의 이 페이지 저장소. 다음에 열어도 이어집니다.",
+      local: "저장: 이 브라우저에만 저장됩니다. 기기를 바꾸면 보이지 않습니다.",
+      memory: "저장되지 않습니다. 탭을 닫으면 기록이 사라지니 하루 끝 화면을 복사해 두세요."
     }[store.kind];
-    $("syncNote").textContent = failed ? "저장 실패 — 화면의 기록은 유지되지만 다시 열면 사라질 수 있습니다" : t;
-    $("syncNote").title = store.kind === "db" ? "같은 Claude 계정으로 이 아티팩트를 열면 이어집니다." : store.kind === "local" ? "같은 브라우저에서만 이어집니다." : "현재 화면에서만 유지됩니다.";
+    $("syncNote").textContent = failed ? "저장에 실패했습니다. 잠시 뒤 다시 시도되며, 화면의 기록은 그대로 유지됩니다." : t;
   }
 
   /* ---------- 동작 ---------- */
@@ -680,11 +640,8 @@ body.big .tally { font-size: 15px; }
     state.items = state.items.filter(function (i) { return i.id !== id; });
     save(); render();
   }
-  function check(id, force) {
+  function check(id) {
     if (state.endedAt || checkOf(id)) return;
-    var item = findItem(id), incomplete = item && item.steps && item.steps.length && stepsDone(item) < item.steps.length;
-    if (incomplete && !force) { checkWarnId = id; render(); return; }
-    checkWarnId = null;
     state.events.push({ itemId: id, type: "check", at: new Date().toISOString() });
     save(); render();
   }
@@ -723,7 +680,7 @@ body.big .tally { font-size: 15px; }
     // 1) 횟수를 먼저 올리고 저장한다. 개입 결과가 횟수에 영향을 줄 수 없게 하는 순서.
     // 끝을 누르지 않고 새로 누른 경우 이전 타이머는 시간을 알 수 없는 것으로 남긴다.
     rechecksOf(id).forEach(function (r) { if (r.timed && !r.endAt) r.timed = false; });
-    var ev = { itemId: id, type: "recheck", at: new Date().toISOString(), timed: !!state.timeTracking };
+    var ev = { itemId: id, type: "recheck", at: new Date().toISOString(), timed: fullMode };
     state.events.push(ev);
     var n = rechecksOf(id).length;
     msgs[id] = interventionOn() ? { status: "wait", text: "" } : null;
@@ -831,44 +788,62 @@ body.big .tally { font-size: 15px; }
     return list.map(function (x) { return String(x).trim(); }).filter(Boolean).slice(0, max).map(function (t) { return t.slice(0, len); });
   }
 
-  async function makeSteps(id) {
-    var item = findItem(id);
-    if (!item || !sampleFn || state.endedAt) return;
-    stepMsg[id] = "AI가 빠진 기준을 찾고 있습니다…";
+  /* ---------- 세부사항: 직접 쓰기, AI가 한꺼번에 쓰기 ---------- */
+  function setAiNote(text, ms) {
+    aiNote = text || "";
+    clearTimeout(aiNoteTimer);
+    if (aiNote && ms) aiNoteTimer = setTimeout(function () { aiNote = ""; render(); }, ms);
+  }
+  // 여러 줄을 붙여 넣으면 한 줄이 세부사항 하나가 된다.
+  function addSteps(item, raw) {
+    if (!item || state.endedAt) return 0;
+    var lines = String(raw || "").split(/\r?\n/).map(function (s) { return s.trim(); }).filter(Boolean);
+    if (!item.steps) item.steps = [];
+    var n = 0;
+    lines.forEach(function (t) { if (item.steps.length < 12) { item.steps.push({ id: uid(), text: t.slice(0, 80) }); n++; } });
+    if (n) save();
+    return n;
+  }
+  function removeStep(item, stepId) {
+    if (state.endedAt) return;
+    item.steps = (item.steps || []).filter(function (s) { return s.id !== stepId; });
+    save(); render();
+  }
+  // 세부사항이 없는 항목 전부에 대해 AI가 한 번에 확인 기준을 쓴다. 직접 쓴 세부사항은 건드리지 않는다.
+  async function makeAllSteps() {
+    if (!sampleFn || state.endedAt || aiBusy) return;
+    var targets = state.items.filter(function (i) { return !(i.steps && i.steps.length); });
+    if (!targets.length) { setAiNote("모든 항목에 이미 세부사항이 있어요.", 6000); render(); return; }
+    aiBusy = true;
+    setAiNote("AI가 항목 " + targets.length + "개의 확인 기준을 쓰고 있어요. 잠시만 기다려 주세요…");
     render();
+    var list = targets.map(function (i, k) { return (k + 1) + ". [" + groupName(groupOf(i)) + "] " + i.text; }).join("\n");
     var prompt = [
-      "아래 확인 항목과 사용자가 이미 적은 세부사항을 읽고, 빠졌을 가능성이 있는 세부 확인만 2~4개 제안해라.",
+      "사용자는 업무를 끝낼 때마다 빠뜨린 것이 없는지 확인한다. 그런데 '무엇을 봤는지' 기준이 없어서 이미 확인한 것도 다시 확인한다. 아래 번호가 붙은 확인 항목 각각을, 눈으로 직접 보고 하나씩 체크할 수 있는 구체적인 세부 확인 3~4개로 나눠라.",
       "",
-      "항목: " + item.text,
-      "분류: " + groupName(groupOf(item)),
-      "이미 있는 세부사항: " + ((item.steps || []).map(function (s) { return s.text; }).join(" / ") || "없음"),
+      list,
       "",
       "규칙:",
       "- 각 세부 확인은 40자 이내로, 무엇을 어디서 보는지가 드러나게 쓴다.",
       "- 항목 글에 없는 구체적 사실(이름, 숫자, 파일명)을 지어내지 않는다.",
-      "- 이미 있는 세부사항과 같거나 뜻이 겹치는 제안은 제외한다.",
-      "- 한국어. JSON 문자열 배열만 출력한다. 예: [\"첫 번째 확인\", \"두 번째 확인\"]"
+      "- 이런 확인에서 흔히 빠지는 지점을 포함한다.",
+      "- 출력은 JSON 배열 하나만. 배열의 k번째 원소가 k번 항목의 세부 확인 문자열 배열이다. 배열 길이는 항목 수 " + targets.length + "와 같아야 한다.",
+      "- 예(항목 2개): [[\"첫 확인\", \"둘째 확인\"], [\"첫 확인\", \"둘째 확인\"]]"
     ].join("\n");
     try {
-      var steps = toStrings(await sampleFn.json(prompt, { modelTier: "quick", cache: false }), 4, 60);
-      if (!steps.length) throw { code: "invalid_json" };
-      var existing = (item.steps || []).map(function (s) { return s.text.trim().toLowerCase(); });
-      stepSuggestions[id] = steps.filter(function (t) { return existing.indexOf(t.toLowerCase()) < 0; }).map(function (t) { return { text: t, selected: true }; });
-      stepMsg[id] = "";
-    } catch (e) { stepMsg[id] = aiErr(e); }
+      var res = await sampleFn.json(prompt, { modelTier: "default", cache: false });
+      var rows = Array.isArray(res) ? res : (res && typeof res === "object" ? targets.map(function (_, k) { return res[String(k + 1)] || res[k]; }) : []);
+      var filled = 0;
+      targets.forEach(function (item, k) {
+        var steps = toStrings(rows[k], 5, 60);
+        if (steps.length) { item.steps = steps.map(function (t) { return { id: uid(), text: t }; }); filled++; }
+      });
+      if (!filled) throw { code: "invalid_json" };
+      save();
+      setAiNote("항목 " + filled + "개에 세부사항을 만들었어요. 마음에 안 들면 ×로 지우고 직접 써도 돼요." + (filled < targets.length ? " (" + (targets.length - filled) + "개는 만들지 못했어요. 다시 눌러 보세요.)" : ""), 12000);
+    } catch (e) { setAiNote(aiErr(e), 10000); }
+    aiBusy = false;
     render();
-  }
-
-  function addSuggestions(item) {
-    var list = stepSuggestions[item.id] || [];
-    item.steps = item.steps || [];
-    var existing = item.steps.map(function (s) { return s.text.trim().toLowerCase(); });
-    list.filter(function (s) { return s.selected; }).forEach(function (s) {
-      if (existing.indexOf(s.text.trim().toLowerCase()) >= 0) return;
-      item.steps.push({ id: uid(), text: s.text, source: "ai", createdAt: new Date().toISOString() });
-      existing.push(s.text.trim().toLowerCase());
-    });
-    delete stepSuggestions[item.id]; save(); render();
   }
 
   function postKey(p) { return p.recIdx || p.company; }
@@ -898,7 +873,7 @@ body.big .tally { font-size: 15px; }
     try {
       var steps = toStrings(await sampleFn.json(prompt, { modelTier: "default", cache: false }), 6, 70);
       if (!steps.length) throw { code: "invalid_json" };
-      state.items.push({ id: uid(), text: text, group: "job", createdAt: new Date().toISOString(), steps: steps.map(function (t) { return { id: uid(), text: t, source: "ai", createdAt: new Date().toISOString() }; }) });
+      state.items.push({ id: uid(), text: text, group: "job", createdAt: new Date().toISOString(), steps: steps.map(function (t) { return { id: uid(), text: t }; }) });
       postMsg[key] = "공고·지원 탭에 항목을 만들었습니다.";
       save();
     } catch (e) { postMsg[key] = aiErr(e); }
@@ -911,8 +886,7 @@ body.big .tally { font-size: 15px; }
       var c = checkOf(i.id), rs = rechecksOf(i.id);
       var line = "[" + groupName(groupOf(i)) + "] " + i.text + " | " + (c ? "체크 " + hms(c.at) : "체크 안 함");
       line += i.steps && i.steps.length ? " | 세부 확인 " + stepsDone(i) + "/" + i.steps.length : " | 세부 확인 기준 없음";
-      if (i.evidence) line += " | 확인 근거: " + i.evidence;
-      if (c && rs.length) line += " | 재확인 " + rs.length + "회: " + rs.map(function (r) { return hms(r.at) + "(체크 후 " + Math.round((new Date(r.at) - new Date(c.at)) / 60000) + "분" + (typeof r.sec === "number" ? ", 소요 " + fmtDur(r.sec) : "") + (r.reason ? ", 이유: " + reasonName(r.reason) : "") + (r.reasonNote ? ", 직접 입력: " + r.reasonNote : "") + ")"; }).join(", ");
+      if (c && rs.length) line += " | 재확인 " + rs.length + "회: " + rs.map(function (r) { return hms(r.at) + "(체크 후 " + Math.round((new Date(r.at) - new Date(c.at)) / 60000) + "분" + (typeof r.sec === "number" ? ", 소요 " + fmtDur(r.sec) : "") + (r.reason ? ", 이유: " + reasonName(r.reason) : "") + ")"; }).join(", ");
       lines.push(line);
     });
     lines.push("총 체크 " + t.checks + ", 총 재확인 " + t.rechecks + ", 기록 후 재확인 항목 " + t.rechecked.length + ", 체크 취소 " + undoCount() + "회" + (t.timed ? ", 재확인 시간 합계 " + fmtDur(t.secs) + "(잰 것 " + t.timed + "회)" : ""));
@@ -924,7 +898,7 @@ body.big .tally { font-size: 15px; }
     analysisMsg = { status: "wait", text: "" };
     render();
     var prompt = [
-      "너는 사용자의 하루 확인 기록을 읽고 관찰된 패턴만 알려 주는 분석 보조자다. 재확인 횟수와 확인 근거를 비교하되 원인이나 심리 상태를 단정하지 않는다.",
+      "너는 사용자의 하루 확인 기록을 읽고 패턴을 알려 주는 분석 보조자다. 사용자는 업무를 끝낼 때마다 빠뜨린 것이 없는지 확인하고, 이미 확인한 것도 불안해서 다시 확인한다. 가설은 '확인한 증거를 즉시 남기면 같은 것을 다시 확인하는 횟수가 줄어든다'이다. 기록을 남겼는데도 기록을 믿지 못해 다시 확인하면 원인은 기록 부재가 아니라 불안 자체다.",
       "",
       "오늘의 기록:",
       logText(),
@@ -932,11 +906,11 @@ body.big .tally { font-size: 15px; }
       "다음 순서로 평문(마크다운 없이) 12줄 이내로 써라.",
       "1) 첫 줄에 이 결과는 하루치이고 표본이 작아 단정할 수 없다고 밝힌다.",
       "2) 사실 요약: 어떤 분류나 항목에서 재확인이 몰렸는지, 체크 후 몇 분 뒤에 재확인이 일어났는지. 기록에 있는 숫자와 시각만 쓴다.",
-      "3) 세부 확인을 모두 마친 항목과 기준이 없던 항목을 나누어 재확인 기록을 비교한다. 확인 근거와 직접 적은 이유가 있으면 함께 요약한다.",
-      "   재확인 이유가 표시되지 않았다면 이유를 모른다고 말한다.",
+      "3) 가설과의 관련: 세부 확인을 모두 마쳤는데도 재확인한 항목이 있으면 '기록을 못 믿은 경우의 후보'로 짚고, 세부 확인 기준이 없던 항목의 재확인과 구분해서 말한다. 해당 항목이 없으면 없다고 말한다.",
+      "   재확인 이유가 표시된 것이 있으면, '기록을 못 믿겠음'으로 표시된 횟수를 반증 조건의 직접 신호로 따로 말한다. 이유 표시가 없으면 이유를 모른다고 말한다.",
       "   빠뜨림 기록이 있으면 체크한 항목에서 나온 것인지 구분해 말하고, 없으면 기록상 실제로 빠뜨린 일은 없었다고 말한다.",
       "4) 내일 시도해 볼 구체적인 것 한 가지.",
-      "기록에 없는 일을 추측하지 않는다. 진단, 치료 조언, 위로는 하지 않는다."
+      "기록에 없는 일을 추측하지 않는다. 진단, 치료 조언, 위로는 하지 않는다. '지지', '반증' 같은 판정 단어는 쓰지 말고 '참고가 되는 신호' 정도로 약하게 말한다."
     ].join("\n");
     try {
       var res = await sampleFn(prompt, {
@@ -1014,7 +988,7 @@ body.big .tally { font-size: 15px; }
       return { checks: t.checks, rechecks: t.rechecks, rechecked: t.rechecked.length, items: st.items.length, undo: undoCount(), secs: t.secs, timed: t.timed, aiOff: !!st.aiOff, v: verdict(t) };
     } finally { state = prev; }
   }
-  function verdictShort(v) { return v.cls === "ok" ? "재확인 적음" : v.cls === "bad" ? "재확인 많음" : "추가 관찰"; }
+  function verdictShort(v) { return v.cls === "ok" ? "적은 편" : v.cls === "bad" ? "많은 편" : "보통"; }
   function fmtDate(iso) {
     var d = new Date(iso);
     return (d.getMonth() + 1) + "/" + d.getDate() + "(" + "일월화수목금토".charAt(d.getDay()) + ")";
@@ -1074,7 +1048,7 @@ body.big .tally { font-size: 15px; }
       ));
     });
     p.appendChild(h("div", { class: "tbl" }, h("table", null,
-      h("thead", null, h("tr", null, h("th", { text: "날짜" }), h("th", { class: "n", text: "체크" }), h("th", { class: "n", text: "재확인" }), h("th", { class: "n", text: "재확인 항목" }), h("th", { class: "n", text: "시간" }), h("th", { text: "개입" }), h("th", { text: "관찰" }))),
+      h("thead", null, h("tr", null, h("th", { text: "날짜" }), h("th", { class: "n", text: "체크" }), h("th", { class: "n", text: "재확인" }), h("th", { class: "n", text: "재확인 항목" }), h("th", { class: "n", text: "시간" }), h("th", { text: "개입" }), h("th", { text: "참고" }))),
       tbody
     )));
     var max = Math.max(1, Math.max.apply(null, rows.map(function (r) { return r.stats.rechecks; })));
@@ -1088,16 +1062,6 @@ body.big .tally { font-size: 15px; }
     });
     p.appendChild(h("p", { text: "날짜별 총 재확인 횟수" }));
     p.appendChild(bars);
-    var detailRows = [];
-    rows.forEach(function (r) {
-      r.st.items.forEach(function (i) { if (i.evidence) detailRows.push(fmtDT(r.st.startedAt) + " · " + i.text + " 확인 근거: " + i.evidence); });
-      r.st.events.forEach(function (e) { if (e.type === "recheck" && e.reasonNote) { var i = r.st.items.filter(function (x) { return x.id === e.itemId; })[0]; detailRows.push(fmtDT(e.at) + " · " + (i ? i.text : "삭제된 항목") + " 재확인 이유: " + e.reasonNote); } });
-    });
-    if (detailRows.length) {
-      var evBox = h("div", null, h("p", { text: "저장된 확인 근거와 직접 적은 이유" }));
-      detailRows.slice(0, 30).forEach(function (line) { evBox.appendChild(h("p", { class: "meta", style: "padding:0", text: line })); });
-      p.appendChild(evBox);
-    }
     var onD = done.filter(function (r) { return !r.stats.aiOff; }), offD = done.filter(function (r) { return r.stats.aiOff; });
     function avgRe(list) { return (list.reduce(function (a, r) { return a + r.stats.rechecks; }, 0) / list.length).toFixed(1); }
     if (onD.length && offD.length) {
@@ -1114,7 +1078,7 @@ body.big .tally { font-size: 15px; }
   function endDay() { state.events.forEach(function (e) { if (e.type === "recheck" && e.timed && !e.endAt) e.timed = false; }); state.endedAt = new Date().toISOString(); confirming = false; copyFallback = ""; copyNote = ""; save(); archiveDay(); render(); }
   async function newDay() {
     var old = JSON.parse(JSON.stringify(state));
-    msgs = {}; confirming = false; copyFallback = ""; copyNote = ""; analysisMsg = null; stepMsg = {}; stepAddOpen = {}; stepDrafts = {}; stepSuggestions = {}; evidenceOpen = {}; checkWarnId = null;
+    msgs = {}; confirming = false; copyFallback = ""; copyNote = ""; analysisMsg = null; stepMsg = {};
     state = freshDay();
     try { await saving; await writeDoc("day-" + old.id, old); } catch (e) {}
     save(); render();
@@ -1125,12 +1089,12 @@ body.big .tally { font-size: 15px; }
     var added = 0;
     list.forEach(function (x) {
       var dup = state.items.some(function (i) { return i.text === x.text && groupOf(i) === x.group; });
-      if (!dup) { state.items.push({ id: uid(), text: x.text, group: x.group, createdAt: new Date().toISOString(), steps: (x.steps || []).map(function (s) { return { id: uid(), text: s.text || String(s), source: s.source || "manual", createdAt: new Date().toISOString() }; }) }); added++; }
+      if (!dup) { state.items.push({ id: uid(), text: x.text, group: x.group, createdAt: new Date().toISOString() }); added++; }
     });
     return added;
   }
   async function saveTemplate() {
-    var items = state.items.map(function (i) { return { text: i.text, group: groupOf(i), steps: (i.steps || []).map(function (s) { return { text: s.text, source: s.source || "manual" }; }) }; });
+    var items = state.items.map(function (i) { return { text: i.text, group: groupOf(i) }; });
     if (!items.length) { tplNote = "저장할 항목이 없습니다."; render(); return; }
     tpl = { items: items, savedAt: new Date().toISOString() };
     try { await writeDoc("templates", tpl); tplNote = "항목 " + items.length + "개를 템플릿으로 저장했습니다."; }
@@ -1203,61 +1167,44 @@ body.big .tally { font-size: 15px; }
   }
   function stepsNode(item, ended) {
     var wrap = h("div", { class: "stepsbox" });
-    item.steps = item.steps || [];
-    if (item.steps && item.steps.length) {
+    var steps = item.steps || [];
+    if (steps.length) {
       var ul = h("ul", { class: "steps" });
-      item.steps.forEach(function (s, index) {
+      steps.forEach(function (s) {
         var e = stepOn(item.id, s.id);
-        var content;
-        if (stepEditing && stepEditing.itemId === item.id && stepEditing.stepId === s.id && !ended) {
-          var editId = "step-edit-" + s.id;
-          content = h("div", { class: "step-row" },
-            h("input", { class: "field grow", id: editId, type: "text", maxlength: "100", value: s.text, "aria-label": "세부사항 수정", onkeydown: function (ev) { if (ev.key === "Enter" && !ev.isComposing) { ev.preventDefault(); commitStepEdit(item, s.id, this.value); } else if (ev.key === "Escape") { stepEditing = null; render(); } } }),
-            h("button", { class: "btn pen small", type: "button", onclick: function () { commitStepEdit(item, s.id, document.getElementById(editId).value); } }, "저장"),
-            h("button", { class: "btn small", type: "button", onclick: function () { stepEditing = null; render(); } }, "취소"));
-        } else {
-          content = h("div", { class: "step-row" },
-            h("button", { class: "step" + (e ? " done" : ""), type: "button", role: "checkbox", "aria-checked": e ? "true" : "false", disabled: ended, onclick: function () { toggleStep(item, s); } },
-              h("span", { class: "sbox" }, e ? checkMark() : null), h("span", { class: "t", text: s.text }), h("span", { class: "tag", text: s.source === "ai" ? "AI" : "직접" }), e ? h("span", { class: "time", text: hms(e.at) }) : null),
-            !ended ? h("span", { class: "step-tools" },
-              h("button", { class: "x", type: "button", disabled: index === 0, "aria-label": "위로", onclick: function () { moveStep(item, s.id, -1); }, text: "↑" }),
-              h("button", { class: "x", type: "button", disabled: index === item.steps.length - 1, "aria-label": "아래로", onclick: function () { moveStep(item, s.id, 1); }, text: "↓" }),
-              h("button", { class: "x w", type: "button", onclick: function () { stepEditing = { itemId: item.id, stepId: s.id }; render(); }, text: "수정" }),
-              h("button", { class: "x", type: "button", "aria-label": "삭제", onclick: function () { removeStep(item, s.id); }, text: "×" })) : null);
-        }
-        ul.appendChild(h("li", null, content));
+        ul.appendChild(h("li", { class: "stepli" },
+          h("button", {
+            class: "step" + (e ? " done" : ""), type: "button", role: "checkbox", "aria-checked": e ? "true" : "false", disabled: ended,
+            onclick: function () { toggleStep(item, s); }
+          }, h("span", { class: "sbox" }, e ? checkMark() : null), h("span", { class: "t", text: s.text }), e ? h("span", { class: "time", text: hms(e.at) }) : null),
+          ended ? null : h("button", { class: "x sdel", type: "button", "aria-label": s.text + " 지우기", onclick: function () { removeStep(item, s.id); }, text: "×" })));
       });
       wrap.appendChild(ul);
-      var meta = h("div", { class: "row2" }, h("span", { class: "sprog", text: "세부 확인 " + stepsDone(item) + "/" + item.steps.length }));
-      if (sampleFn && !ended) meta.appendChild(h("button", { class: "undo", type: "button", onclick: function () { makeSteps(item.id); } }, "빠진 기준 제안받기"));
-      wrap.appendChild(meta);
     }
-    if (!ended) wrap.appendChild(h("div", { class: "row2" },
-      h("button", { class: "aibtn", type: "button", onclick: function () { stepAddOpen[item.id] = !stepAddOpen[item.id]; render(); } }, stepAddOpen[item.id] ? "직접 입력 닫기" : "+ 세부사항 직접 추가"),
-      sampleFn && !item.steps.length ? h("button", { class: "aibtn", type: "button", onclick: function () { makeSteps(item.id); } }, "빠진 기준 제안받기") : null));
-    if (stepAddOpen[item.id] && !ended) {
-      var taId = "step-add-" + item.id;
-      wrap.appendChild(h("div", { class: "step-add" },
-        h("textarea", { class: "field", id: taId, maxlength: "800", placeholder: "한 줄에 하나씩 적어 주세요.\n예: 첨부파일 이름 확인\n받는 사람 주소 확인", "aria-label": "세부사항 여러 줄 입력", oninput: function () { stepDrafts[item.id] = this.value; } }, stepDrafts[item.id] || ""),
-        h("div", { class: "row2" }, h("button", { class: "btn pen", type: "button", onclick: function () { var n = addManualSteps(item, document.getElementById(taId).value); if (n) { stepDrafts[item.id] = ""; stepAddOpen[item.id] = false; save(); } render(); } }, "줄마다 추가"), h("span", { class: "meta", text: "같은 내용은 한 번만 들어갑니다." }))));
+    var meta = h("div", { class: "row2" });
+    if (steps.length) meta.appendChild(h("span", { class: "sprog", text: "세부 확인 " + stepsDone(item) + "/" + steps.length }));
+    if (!ended) {
+      if (addingStepFor === item.id) {
+        var inp = h("input", { class: "field", type: "text", maxlength: "80", placeholder: "세부사항을 쓰고 엔터 (여러 줄 붙여넣기도 돼요)", "data-stepinput": item.id, "aria-label": item.text + " 세부사항 추가" });
+        inp.addEventListener("keydown", function (ev) {
+          if (ev.key === "Enter" && !ev.isComposing) {
+            ev.preventDefault();
+            if (addSteps(item, inp.value)) { focusStepFor = item.id; render(); }
+            else { addingStepFor = null; render(); }
+          } else if (ev.key === "Escape") { addingStepFor = null; render(); }
+        });
+        inp.addEventListener("paste", function (ev) {
+          var txt = (ev.clipboardData && ev.clipboardData.getData("text")) || "";
+          if (/\n/.test(txt)) { ev.preventDefault(); if (addSteps(item, inp.value + txt)) { focusStepFor = item.id; render(); } }
+        });
+        meta.appendChild(h("div", { class: "stepform" }, inp,
+          h("button", { class: "btn small", type: "button", onclick: function () { if (addSteps(item, inp.value)) { focusStepFor = item.id; } else { addingStepFor = null; } render(); } }, "추가"),
+          h("button", { class: "undo", type: "button", onclick: function () { addingStepFor = null; render(); } }, "닫기")));
+      } else {
+        meta.appendChild(h("button", { class: "undo", type: "button", onclick: function () { addingStepFor = item.id; focusStepFor = item.id; render(); } }, "+ 세부사항"));
+      }
     }
-    if (stepSuggestions[item.id]) {
-      var sug = h("div", { class: "suggestions" }, h("p", { text: "AI 제안입니다. 넣을 항목만 고르세요." }));
-      stepSuggestions[item.id].forEach(function (s) { sug.appendChild(h("label", null, h("input", { type: "checkbox", checked: s.selected, onchange: function () { s.selected = this.checked; } }), h("span", { text: s.text }))); });
-      sug.appendChild(h("div", { class: "row2" }, h("button", { class: "btn pen", type: "button", onclick: function () { addSuggestions(item); } }, "선택한 항목 추가"), h("button", { class: "btn", type: "button", onclick: function () { stepSuggestions[item.id].forEach(function (s) { s.selected = true; }); addSuggestions(item); } }, "모두 추가"), h("button", { class: "btn", type: "button", onclick: function () { delete stepSuggestions[item.id]; render(); } }, "취소")));
-      wrap.appendChild(sug);
-    }
-    if (stepMsg[item.id]) wrap.appendChild(h("p", { class: "ai muted", text: stepMsg[item.id] }));
-    return wrap;
-  }
-  function evidenceNode(item, ended) {
-    var wrap = h("div", { class: "evidence" });
-    if (item.evidence && !evidenceOpen[item.id]) wrap.appendChild(h("p", { text: "확인 근거: " + item.evidence }));
-    if (!ended) wrap.appendChild(h("button", { class: "undo", type: "button", onclick: function () { evidenceOpen[item.id] = !evidenceOpen[item.id]; render(); } }, evidenceOpen[item.id] ? "근거 입력 닫기" : (item.evidence ? "확인 근거 수정" : "확인 근거 남기기")));
-    if (evidenceOpen[item.id] && !ended) {
-      var id = "evidence-" + item.id;
-      wrap.appendChild(h("div", { class: "step-add" }, h("input", { class: "field grow note-input", id: id, type: "text", maxlength: "100", value: item.evidence || "", placeholder: "예: 발송 완료 화면 확인 (민감한 정보는 적지 마세요)", "aria-label": "확인 근거" }), h("div", { class: "row2" }, h("button", { class: "btn pen", type: "button", onclick: function () { item.evidence = document.getElementById(id).value.trim().slice(0, 100); if (!item.evidence) delete item.evidence; evidenceOpen[item.id] = false; save(); render(); } }, "저장"), h("span", { class: "meta", text: "100자 이내 · 비밀번호나 개인정보는 적지 마세요." }))));
-    }
+    if (meta.childNodes.length) wrap.appendChild(meta);
     return wrap;
   }
   function analysisNode() {
@@ -1304,22 +1251,12 @@ body.big .tally { font-size: 15px; }
     ));
     if (tplNote) p.appendChild(h("p", { text: tplNote }));
   }
-  function renderPostsPanel() {
-    var p = $("postsPanel");
-    $("postsBtn").setAttribute("aria-expanded", postsPanelOpen ? "true" : "false");
-    p.hidden = !postsPanelOpen;
-    p.textContent = "";
-    if (!postsPanelOpen) return;
-    p.appendChild(h("p", { text: "공고 확인과 체크리스트 만들기는 기본 확인 흐름과 분리해 두었습니다." }));
-    p.appendChild(postingsNode());
-  }
 
   function summaryText(t) {
     var lines = ["아 마따! 하루 요약", "시작 " + hms(state.startedAt) + " / 종료 " + hms(state.endedAt),
       "총 체크 수 " + t.checks, "총 재확인 횟수 " + t.rechecks, "기록 후에도 다시 확인한 항목 수 " + t.rechecked.length];
-    if (t.rechecks) { lines.push(durLine(t)); lines.push(reasonLine()); }
+    if (t.rechecks) { if (t.timed) lines.push(durLine(t)); lines.push(reasonLine()); }
     t.rechecked.forEach(function (i) { lines.push("- " + i.text + ": 재확인 " + rechecksOf(i.id).length + "회"); });
-    state.items.forEach(function (i) { if (i.evidence) lines.push("- " + i.text + " 확인 근거: " + i.evidence); });
     var u = undoCount();
     if (u) lines.push("체크 취소 " + u + "회");
     if (state.analysis && state.analysis.text) lines.push("", "AI 분석", state.analysis.text);
@@ -1333,16 +1270,27 @@ body.big .tally { font-size: 15px; }
 
     $("status").textContent = ended
       ? "측정 종료 " + hms(state.endedAt) + " · 시작 " + hms(state.startedAt)
-      : "측정 중 · 시작 " + hms(state.startedAt) + " · 체크 " + t.checks + "/" + state.items.length + (state.aiOff ? " · AI 개입 끔" : "") + (sampleFn ? "" : " · AI 기능 없음");
+      : "측정 중 · 시작 " + hms(state.startedAt) + " · 체크 " + t.checks + "/" + state.items.length + (state.aiOff ? " · AI 개입 끔" : "") + (sampleFn ? "" : " · AI 사용 불가(claude.ai 링크에서 열어야 켜집니다)");
     var aiBtn = $("aiBtn");
     aiBtn.hidden = !sampleFn;
     aiBtn.disabled = aiLocked();
     aiBtn.textContent = state.aiOff ? "AI 개입 끔" : "AI 개입 켬";
     aiBtn.setAttribute("aria-pressed", state.aiOff ? "false" : "true");
     aiBtn.title = aiLocked() ? "재확인을 시작한 뒤에는 바꿀 수 없습니다" : "끄면 재확인 때 Claude가 말하지 않고 횟수와 시간만 기록합니다";
-    $("timeBtn").textContent = state.timeTracking ? "시간 측정 켬" : "시간 측정 끔";
-    $("timeBtn").setAttribute("aria-pressed", state.timeTracking ? "true" : "false");
-    $("timeBtn").disabled = ended;
+    var asb = $("aiStepsBtn");
+    asb.hidden = !sampleFn || ended;
+    asb.disabled = aiBusy;
+    asb.textContent = aiBusy ? "AI가 쓰는 중…" : "AI 확인 기준";
+    var mb = $("modeBtn");
+    mb.textContent = fullMode ? "간단히 보기" : "전체 보기";
+    mb.setAttribute("aria-pressed", fullMode ? "true" : "false");
+    if (!fullMode) { missOpen = false; tplOpen = false; if (bigMode) { bigMode = false; tab = prevTab; } }
+    $("missBtn").hidden = !fullMode;
+    $("tplBtn").hidden = !fullMode;
+    $("bigBtn").hidden = !fullMode;
+    $("keyHint").hidden = !fullMode;
+    $("aiNote").hidden = !aiNote;
+    $("aiNote").textContent = aiNote;
     $("addRow").hidden = ended;
     $("privacy").hidden = ended;
     $("newItem").disabled = ended;
@@ -1351,9 +1299,6 @@ body.big .tally { font-size: 15px; }
     renderTemplatePanel();
     renderHistoryPanel();
     renderMissPanel();
-    renderPostsPanel();
-    $("helpPanel").hidden = !helpOpen;
-    $("helpBtn").setAttribute("aria-expanded", helpOpen ? "true" : "false");
 
     var area = $("listArea");
     area.textContent = "";
@@ -1401,21 +1346,19 @@ body.big .tally { font-size: 15px; }
           if (!c) side.appendChild(h("button", { class: "x", type: "button", "aria-label": item.text + " 삭제", onclick: function () { removeItem(item.id); }, text: "×" }));
         }
         var body = h("div", { class: "body" }, h("div", { class: "row1" }, nameEl, side));
-        body.appendChild(stepsNode(item, ended));
-        if (checkWarnId === item.id && !c && !ended && stepsDone(item) < item.steps.length) body.appendChild(h("div", { class: "check-warning" }, h("p", { text: "아직 확인하지 않은 세부사항이 있습니다. 그래도 전체 항목을 체크하시겠습니까?" }), h("div", { class: "row2" }, h("button", { class: "btn pen", type: "button", onclick: function () { check(item.id, true); } }, "그래도 전체 체크"), h("button", { class: "btn", type: "button", onclick: function () { checkWarnId = null; render(); } }, "세부 확인으로 돌아가기"))));
+        if ((item.steps && item.steps.length) || (sampleFn && !ended)) body.appendChild(stepsNode(item, ended));
         if (c) {
-          body.appendChild(evidenceNode(item, ended));
           var row2 = h("div", { class: "row2" });
           if (!ended) row2.appendChild(h("button", { class: "recheck", type: "button", onclick: function () { recheck(item.id); } }, "다시 확인했음"));
-          var open = ended ? null : openRecheck(item.id);
-          if (open && state.timeTracking) {
+          var open = ended || !fullMode ? null : openRecheck(item.id);
+          if (open) {
             row2.appendChild(h("span", { class: "timer", "data-since": open.at, text: timerText(open.at) }));
             row2.appendChild(h("button", { class: "btn pen small", type: "button", onclick: function () { endRecheck(item.id); } }, "끝"));
           }
           var ty = tallyNode(rc);
           if (ty) row2.appendChild(ty);
           if (!ended && !rc) row2.appendChild(h("button", { class: "undo", type: "button", onclick: function () { uncheck(item.id); } }, "실수로 눌렀어요 (체크 취소)"));
-          row2.appendChild(h("button", { class: "undo", type: "button", disabled: ended, onclick: function () { toggleItemMiss(item); } }, missOf(item.id) ? "빠뜨림 기록됨 (취소)" : "체크했는데 빠뜨린 게 있었어요"));
+          if (fullMode) row2.appendChild(h("button", { class: "undo", type: "button", disabled: ended, onclick: function () { toggleItemMiss(item); } }, missOf(item.id) ? "빠뜨림 기록됨 (취소)" : "체크했는데 빠뜨린 게 있었어요"));
           body.appendChild(row2);
           var lastRe = rechecksOf(item.id).slice(-1)[0];
           if (lastRe && !ended) body.appendChild(reasonNode(lastRe));
@@ -1424,6 +1367,7 @@ body.big .tally { font-size: 15px; }
           if (mn) slot.appendChild(mn);
           body.appendChild(slot);
         }
+        if (isDeadlineItem(item)) body.appendChild(postingsNode());
         ul.appendChild(h("li", { class: "item" + (selId === item.id ? " sel" : ""), "data-id": item.id }, box, body));
       });
       area.appendChild(ul);
@@ -1447,6 +1391,11 @@ body.big .tally { font-size: 15px; }
     eb.textContent = editMode && !ended ? "편집 끝" : "편집";
     eb.setAttribute("aria-pressed", editMode && !ended ? "true" : "false");
     if (editingId && focusEdit) { var ei = $("editInput"); if (ei) { ei.focus(); ei.select(); } focusEdit = false; }
+    if (focusStepFor) {
+      var si = document.querySelector('[data-stepinput="' + focusStepFor + '"]');
+      if (si) si.focus();
+      focusStepFor = null;
+    }
     if (scrollSel && selId) {
       var selEl = document.querySelector('[data-id="' + selId + '"]');
       if (selEl && selEl.scrollIntoView) selEl.scrollIntoView({ block: "nearest" });
@@ -1485,7 +1434,7 @@ body.big .tally { font-size: 15px; }
         h("div", { class: "verdict " + v.cls, text: v.text })
       );
       var notes = [];
-      if (t.rechecks) notes.push(durLine(t));
+      if (t.timed) notes.push(durLine(t));
       if (t.rechecks) notes.push(reasonLine());
       notes.push(missesToday().length ? "오늘 빠뜨림으로 기록한 것 " + missesToday().length + "건 (최근 7일 " + missRecent(7) + "건)." : "오늘 빠뜨림으로 기록한 것은 없습니다 (최근 7일 " + missRecent(7) + "건). 재확인이 있었는데 실제로 빠뜨린 일이 없었다면, 재확인이 위험을 막은 것인지 불안인지 이 숫자로 비교해 볼 수 있습니다.");
       if (unchecked > 0) notes.push("체크하지 못한 항목 " + unchecked + "개는 위 숫자에 들어가지 않았습니다.");
@@ -1510,13 +1459,7 @@ body.big .tally { font-size: 15px; }
           tbody
         )));
       }
-      var evidenceList = state.items.filter(function (i) { return i.evidence; });
-      if (evidenceList.length) {
-        var evidenceBox = h("div", null, h("p", { class: "meta", style: "padding:0", text: "확인 근거" }));
-        evidenceList.forEach(function (i) { evidenceBox.appendChild(h("p", { class: "meta", style: "padding:0", text: "- " + i.text + ": " + i.evidence })); });
-        s.appendChild(evidenceBox);
-      }
-      s.appendChild(h("p", { class: "meta", style: "padding:0", text: "표시는 하루 기록을 보기 쉽게 나눈 참고 범위입니다. 재확인 이유나 심리 상태를 단정하지 않습니다. " + (state.aiOff ? "이 하루는 AI 개입 없이 측정했습니다." : "Claude 개입이 켜진 상태의 기록입니다.") }));
+      s.appendChild(h("p", { class: "meta", style: "padding:0", text: "참고 기준(임의로 정한 값): 기록 후 재확인 항목이 2개 이하이고 총 3회 이하면 적은 편, 항목 5개 이상이거나 총 10회 이상이면 많은 편이에요. 효과가 있었다는 증거가 아니라 하루를 훑어보는 참고예요." }));
       if (sampleFn || state.analysis) s.appendChild(analysisNode());
       var actions = h("div", { class: "row2" },
         h("button", { class: "btn", type: "button", onclick: function () {
@@ -1545,14 +1488,6 @@ body.big .tally { font-size: 15px; }
       if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); submitNew(); }
     });
     $("tplBtn").addEventListener("click", function () { tplOpen = !tplOpen; tplNote = ""; if (tplOpen) { histOpen = false; missOpen = false; } render(); });
-    $("postsBtn").addEventListener("click", function () { postsPanelOpen = !postsPanelOpen; if (postsPanelOpen) { tplOpen = false; histOpen = false; missOpen = false; helpOpen = false; } render(); });
-    $("helpBtn").addEventListener("click", function () { helpOpen = !helpOpen; if (helpOpen) { tplOpen = false; histOpen = false; missOpen = false; postsPanelOpen = false; } render(); });
-    $("timeBtn").addEventListener("click", function () {
-      if (state.endedAt) return;
-      state.timeTracking = !state.timeTracking;
-      if (!state.timeTracking) state.events.forEach(function (e) { if (e.type === "recheck" && e.timed && !e.endAt) e.timed = false; });
-      save(); render();
-    });
     $("missDate").value = todayStr();
     $("missDate").max = todayStr();
     function submitMiss() {
@@ -1564,14 +1499,20 @@ body.big .tally { font-size: 15px; }
     $("missText").addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); submitMiss(); } });
     $("missBtn").addEventListener("click", function () {
       missOpen = !missOpen;
-      if (missOpen) { tplOpen = false; histOpen = false; postsPanelOpen = false; helpOpen = false; }
+      if (missOpen) { tplOpen = false; histOpen = false; }
+      render();
+    });
+    $("aiStepsBtn").addEventListener("click", makeAllSteps);
+    $("modeBtn").addEventListener("click", function () {
+      fullMode = !fullMode;
+      try { localStorage.setItem("am_full", fullMode ? "1" : "0"); } catch (e) {}
       render();
     });
     $("editBtn").addEventListener("click", function () { editMode = !editMode; editingId = null; render(); });
     function setBig(on) {
       if (on === bigMode) return;
       bigMode = on;
-      if (on) { prevTab = tab; if (tab === "all") tab = "out"; editMode = false; editingId = null; tplOpen = false; histOpen = false; missOpen = false; postsPanelOpen = false; helpOpen = false; }
+      if (on) { prevTab = tab; if (tab === "all") tab = "out"; editMode = false; editingId = null; tplOpen = false; histOpen = false; missOpen = false; }
       else tab = prevTab;
       render();
       try { window.scrollTo(0, 0); } catch (e) {}
@@ -1586,7 +1527,7 @@ body.big .tally { font-size: 15px; }
     });
     $("histBtn").addEventListener("click", function () {
       histOpen = !histOpen;
-      if (histOpen) { tplOpen = false; missOpen = false; postsPanelOpen = false; helpOpen = false; loadHistory(); } else render();
+      if (histOpen) { tplOpen = false; missOpen = false; loadHistory(); } else render();
     });
   }
 
@@ -1600,18 +1541,15 @@ body.big .tally { font-size: 15px; }
     state = (s && s.items && s.events) ? JSON.parse(JSON.stringify(s)) : freshDay();
     // 분류가 없던 이전 버전의 항목은 예시 문구로 분류를 찾고, 없으면 업무 마무리에 둔다.
     state.items.forEach(function (i) {
-      if (!i.group) {
-        var ex = EXAMPLES.filter(function (e) { return e.t === i.text; })[0];
-        i.group = ex ? ex.g : "work";
-      }
-      i.steps = (i.steps || []).map(function (s) { return { id: s.id || uid(), text: s.text || String(s), source: s.source || "ai", createdAt: s.createdAt || i.createdAt || state.startedAt }; });
+      if (i.group) return;
+      var ex = EXAMPLES.filter(function (e) { return e.t === i.text; })[0];
+      i.group = ex ? ex.g : "work";
     });
-    if (typeof state.timeTracking !== "boolean") state.timeTracking = false;
     try { var pm = await readDoc("postmarks"); marks = pm && pm.marks ? JSON.parse(JSON.stringify(pm.marks)) : {}; } catch (e) { marks = {}; }
     try { var mdoc = await readDoc("misses"); misses = mdoc && mdoc.list ? JSON.parse(JSON.stringify(mdoc.list)) : []; } catch (e) { misses = []; }
     try { tpl = await readDoc("templates"); tpl = tpl ? JSON.parse(JSON.stringify(tpl)) : null; } catch (e) { tpl = null; }
     setSync(false);
-    if (!sampleFn) $("privacy").textContent = "AI 없이도 직접 입력, 체크, 기록 기능은 모두 쓸 수 있습니다. AI 제안과 분석만 이 화면에서는 사용할 수 없습니다.";
+    if (!sampleFn) $("privacy").textContent = "이 화면에서는 Claude 개입을 쓸 수 없어 체크와 재확인 횟수만 기록합니다.";
     if (store.kind === "db") {
       try {
         store.db.collection("postings").onSnapshot(function (snap) { posts = snap.docs.map(function (d) { return d.data(); }); render(); }, function () {});

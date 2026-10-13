@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>아 마따! 화면 테스트</title>
+  <style>
+    body { font: 15px/1.6 system-ui, "Malgun Gothic", sans-serif; max-width: 860px; margin: 24px auto; padding: 0 16px; }
+    h1 { font-size: 20px; }
+    li { margin: 3px 0; }
+    .ok { color: #217a4a; } .bad { color: #c0392b; font-weight: 700; }
+    #summary { font-weight: 700; margin: 12px 0; }
+    #frames iframe { position: absolute; left: -9999px; width: 900px; height: 800px; }
+    code { background: #f1f1f1; padding: 0 4px; }
+  </style>
+</head>
+<body>
+  <h1>아 마따! 화면 테스트</h1>
+  <p><code>../amatta.html</code>을 가짜 claude.ai 환경(저장소, 사용자, AI 호출)에 넣고 사람이 누르는 것처럼 조작해서 확인합니다. 인터넷이 필요 없습니다.</p>
+  <div id="summary">실행 중…</div>
+  <ul id="out"></ul>
+  <div id="frames"></div>
+
+<script>
+(async function () {
+  'use strict';
+  const out = document.getElementById('out');
+  const framesEl = document.getElementById('frames');
+  const pageHtml = await (await fetch('../amatta.html')).text();
+  const CUR = 'data/users/u_test/current';
+  const clone = (o) => (o === undefined ? undefined : JSON.parse(JSON.stringify(o)));
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  window.__stubs = {};
+  let frameSeq = 0;
+
+  // ── 가짜 저장소: 불러온 문서는 고정(frozen)해서 돌려준다. 진짜 db와 같은 조건이다. ──
+  function makeDb(store, log) {
+    const freeze = (o) => { if (o && typeof o === 'object') { Object.freeze(o); Object.values(o).forEach(freeze); } return o; };
+    const subs = [];
+    const snapDoc = (path) => ({ id: path.split('/').pop(), exists: store.has(path), data: () => (store.has(path) ? freeze(clone(store.get(path))) : undefined) });
+    const docsOf = (col) => [...store.keys()].filter((k) => k.startsWith(col + '/') && !k.slice(col.length + 1).includes('/')).map(snapDoc);
+    const notify = (path) => subs.forEach((s) => { if (s.path === path) s.fn(snapDoc(path)); else if (s.col && path.startsWith(s.col + '/')) s.fn({ docs: docsOf(s.col) }); });
+    function docRef(path) {
+      return {
+        id: path.split('/').pop(), path,
+        get: async () => snapDoc(path),
+        set: async (d) => { store.set(path, clone(d)); log.push({ op: 'set', path, at: performance.now(), data: clone(d) }); notify(path); },
+        onSnapshot: (fn) => { subs.push({ path, fn }); setTimeout(() => fn(snapDoc(path)), 0); return () => {}; }
+      };
+    }
+    function colRef(col) {
+      return {
+        path: col, doc: (id) => docRef(col + '/' + id),
+        get: async () => ({ docs: docsOf(col) }),
+        onSnapshot: (fn) => { subs.push({ col, fn }); setTimeout(() => fn({ docs: docsOf(col) }), 0); return () => {}; }
+      };
+    }
+    return { doc: docRef, collection: colRef };
+  }
+
+  // ── 새 앱 하나를 띄운다 ──
+  async function newApp(opts) {
+    opts = opts || {};
+    const store = opts.store || new Map();
+    const log = [], calls = [];
+    const id = ++frameSeq;
+    try { localStorage.removeItem('am_full'); if (opts.full) localStorage.setItem('am_full', '1'); } catch (e) { /* 무시 */ }
+
+    const sampleOn = opts.sample !== null;
+    const sample = async (prompt, o) => {
+      calls.push({ kind: 'text', prompt, at: performance.now(), stored: clone(store.get(CUR)) });
+      const text = opts.sampleText || '14시에 체크했고 재확인 1회입니다. 첨부 목록을 대조해 보세요.';
+      if (o && o.onText) o.onText({ text, delta: text });
+      return { text, truncated: false };
+    };
+    sample.json = async (prompt) => {
+      calls.push({ kind: 'json', prompt, at: performance.now() });
+      if (opts.json) return opts.json(prompt);
+      const n = (prompt.match(/^\d+\. \[/gm) || []).length;
+      return Array.from({ length: n }, (_, k) => ['확인 ' + (k + 1) + '-1', '확인 ' + (k + 1) + '-2', '확인 ' + (k + 1) + '-3']);
+    };
+    const db = makeDb(store, log);
+    window.__stubs[id] = { use: (name) => (name === 'db' ? db : name === 'user' ? { id: async () => 'u_test' } : name === 'sample' ? (sampleOn ? sample : null) : null) };
+
+    const iframe = document.createElement('iframe');
+    framesEl.appendChild(iframe);
+    const stub = '<script>window.claude={use:function(n){return Promise.resolve(parent.__stubs[' + id + '].use(n));}};<\/script>';
+    iframe.srcdoc = '<!doctype html><html><head><meta charset="utf-8"></head><body>' + stub + pageHtml + '</body></html>';
+    await new Promise((r) => { iframe.onload = r; });
+
+    const win = iframe.contentWindow, doc = iframe.contentDocument;
+    const $ = (s) => doc.querySelector(s);
+    const $$ = (s) => [...doc.querySelectorAll(s)];
+    const waitFor = async (fn, ms) => { const t0 = Date.now(); while (Date.now() - t0 < (ms || 3000)) { try { const v = fn(); if (v) return v; } catch (e) { /* 계속 */ } await sleep(25); } throw new Error('기다리다 시간 초과: ' + fn.toString().slice(0, 90)); };
+    const btn = (label) => $$('button').find((b) => b.textContent.trim() === label && !b.hidden);
+    const visible = (el) => !!el && !el.hidden && !el.closest('[hidden]');
+    const click = async (el, ms) => { if (!el) throw new Error('버튼 없음'); el.click(); await sleep(ms || 60); };
+    const key = async (k) => { doc.dispatchEvent(new win.KeyboardEvent('keydown', { key: k, bubbles: true })); await sleep(60); };
+    const typeEnter = async (input, value) => {
+      input.value = value;
+      input.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+      await sleep(80);
+    };
+    await waitFor(() => $('#status') && !/불러오는 중/.test($('#status').textContent));
+    await sleep(80);
+    const state = () => clone(store.get(CUR));
+    return { store, log, calls, win, doc, iframe, $, $$, waitFor, btn, visible, click, key, typeEnter, sleep, state, newItem: () => $('#newItem') };
+  }
+
+  // 예시 10개를 넣고 앞의 n개를 체크한다
+  async function withExamples(app, checks) {
+    await app.click(app.btn('예시 항목 10개 넣기'), 120);
+    for (let i = 0; i < (checks || 0); i++) { await app.click(app.$$('.item .box:not(:disabled)')[0], 80); }
+  }
+  const recheckOn = async (app, idx) => { const b = app.$$('.item')[idx].querySelector('.recheck'); await app.click(b, 200); };
+  const endDay = async (app) => { await app.click(app.btn('하루 끝'), 80); await app.click(app.btn('끝내기'), 150); };
+  const verdictText = (app) => (app.$('.verdict') || {}).textContent || '';
+
+  // ── 테스트 목록 ──
+  const tests = [];
+  const T = (name, fn, opts) => tests.push({ name, fn, opts });
+  const eq = (got, want, msg) => { if (JSON.stringify(got) !== JSON.stringify(want)) throw new Error((msg || '') + ' 기대 ' + JSON.stringify(want) + ', 실제 ' + JSON.stringify(got)); };
+  const ok = (cond, msg) => { if (!cond) throw new Error(msg || '조건이 거짓'); };
+
+  T('처음 열면 빈 노트와 예시 안내가 보인다', async (a) => {
+    ok(/아 마따/.test(a.doc.title), '제목');
+    ok(a.btn('예시 항목 10개 넣기'), '예시 버튼');
+    ok(/체크 0\/0/.test(a.$('#status').textContent), '상태 줄: ' + a.$('#status').textContent);
+  });
+
+  T('예시 10개를 넣으면 탭마다 개수가 나온다', async (a) => {
+    await withExamples(a, 0);
+    eq(a.$$('.tab small').map((s) => s.textContent), ['0/10', '0/4', '0/3', '0/3']);
+    eq(a.$$('.item').length, 10);
+  });
+
+  T('다음 줄에 쓰고 엔터를 치면 항목이 추가된다', async (a) => {
+    await withExamples(a, 0);
+    await a.typeEnter(a.newItem(), '프린트 확인');
+    eq(a.$$('.item').length, 11);
+    ok(a.state().items.some((i) => i.text === '프린트 확인'), '저장');
+  });
+
+  T('체크하면 시각이 찍히고 상태 줄이 바뀐다', async (a) => {
+    await withExamples(a, 1);
+    ok(/^\d\d:\d\d:\d\d$/.test(a.$$('.item')[0].querySelector('.time').textContent), '시각 표시');
+    ok(/체크 1\/10/.test(a.$('#status').textContent), '상태 줄');
+    eq(a.state().events.filter((e) => e.type === 'check').length, 1);
+  });
+
+  T('체크 취소는 재확인 전에만 보인다', async (a) => {
+    await withExamples(a, 1);
+    ok(a.btn('실수로 눌렀어요 (체크 취소)'), '취소 버튼');
+    await recheckOn(a, 0);
+    ok(!a.btn('실수로 눌렀어요 (체크 취소)'), '재확인 뒤에는 숨김');
+  });
+
+  T('체크 취소를 누르면 체크가 풀리고 이벤트는 남는다', async (a) => {
+    await withExamples(a, 1);
+    await a.click(a.btn('실수로 눌렀어요 (체크 취소)'), 100);
+    ok(/체크 0\/10/.test(a.$('#status').textContent));
+    eq(a.state().events.map((e) => e.type), ['check', 'uncheck']);
+  });
+
+  T('다시 확인했음: 횟수를 먼저 저장하고, 그 다음에 AI가 말한다', async (a) => {
+    await withExamples(a, 1);
+    await recheckOn(a, 0);
+    await a.waitFor(() => a.calls.length === 1);
+    eq(a.state().events.filter((e) => e.type === 'recheck').length, 1, '저장된 재확인');
+    const stored = a.calls[0].stored;
+    ok(stored && stored.events.some((e) => e.type === 'recheck'), 'AI를 부른 시점에 이미 재확인이 저장되어 있어야 함');
+    await a.waitFor(() => /재확인 1회/.test(a.$$('.item')[0].textContent) || a.$$('.item')[0].querySelector('.ai'));
+    ok(/14시에 체크했고/.test(a.$$('.item')[0].textContent), 'AI 문장 표시');
+  });
+
+  T('AI 개입을 끄면 재확인해도 AI를 부르지 않고, 재확인 뒤에는 바꿀 수 없다', async (a) => {
+    await withExamples(a, 1);
+    await a.click(a.$('#aiBtn'), 100);
+    ok(/끔/.test(a.$('#aiBtn').textContent), '끔 표시');
+    await recheckOn(a, 0);
+    await a.sleep(250);
+    eq(a.calls.length, 0, 'AI 호출 수');
+    eq(a.state().events.filter((e) => e.type === 'recheck').length, 1);
+    ok(a.$('#aiBtn').disabled, '재확인 뒤 잠김');
+  });
+
+  T('재확인 이유 칩을 누르면 마지막 재확인에 저장되고, 다시 누르면 풀린다', async (a) => {
+    await withExamples(a, 1);
+    await recheckOn(a, 0);
+    const chip = a.$$('.chip').find((c) => /못 믿겠음/.test(c.textContent));
+    await a.click(chip, 100);
+    eq(a.state().events.find((e) => e.type === 'recheck').reason, 'trust');
+    await a.click(a.$$('.chip').find((c) => /못 믿겠음/.test(c.textContent)), 100);
+    ok(!a.state().events.find((e) => e.type === 'recheck').reason, '취소');
+  });
+
+  T('세부사항을 직접 쓰고, 여러 줄을 붙여 넣고, 지우고, 체크할 수 있다', async (a) => {
+    await withExamples(a, 0);
+    await a.click(a.btn('+ 세부사항'), 80);
+    const inp = a.$('[data-stepinput]');
+    ok(inp, '입력칸');
+    await a.typeEnter(inp, '첨부파일 목록 대조');
+    // 여러 줄 붙여넣기
+    const inp2 = a.$('[data-stepinput]');
+    const ev = new a.win.Event('paste', { bubbles: true, cancelable: true });
+    ev.clipboardData = { getData: () => '수신자 확인\n파일명 확인\n\n보낸편지함 확인' };
+    inp2.dispatchEvent(ev);
+    await a.sleep(100);
+    let steps = a.state().items[0].steps.map((s) => s.text);
+    eq(steps, ['첨부파일 목록 대조', '수신자 확인', '파일명 확인', '보낸편지함 확인'], '세부사항');
+    // 체크
+    await a.click(a.$$('.item')[0].querySelector('.step'), 80);
+    ok(a.state().events.some((e) => e.type === 'step'), 'step 이벤트');
+    ok(/세부 확인 1\/4/.test(a.$$('.item')[0].textContent), '진행 표시');
+    // 지우기
+    await a.click(a.$$('.item')[0].querySelector('.sdel'), 80);
+    eq(a.state().items[0].steps.length, 3);
+  });
+
+  T('AI 확인 기준 버튼 하나로 세부사항이 없는 항목 전부에 쓰고, 직접 쓴 것은 건드리지 않는다', async (a) => {
+    await withExamples(a, 0);
+    await a.click(a.btn('+ 세부사항'), 80);
+    await a.typeEnter(a.$('[data-stepinput]'), '내가 쓴 세부사항');
+    await a.click(a.btn('닫기'), 60);
+    await a.click(a.btn('AI 확인 기준'), 60);
+    await a.waitFor(() => a.state().items.every((i) => i.steps && i.steps.length));
+    eq(a.calls.filter((c) => c.kind === 'json').length, 1, 'AI 호출은 한 번');
+    const st = a.state();
+    eq(st.items[0].steps.map((s) => s.text), ['내가 쓴 세부사항'], '직접 쓴 것 유지');
+    ok(st.items.slice(1).every((i) => i.steps.length === 3), '나머지 9개는 AI가 3개씩');
+    ok(/9개에 세부사항을 만들었어요/.test(a.$('#aiNote').textContent), '안내 문구: ' + a.$('#aiNote').textContent);
+    const prompt = a.calls.find((c) => c.kind === 'json').prompt;
+    ok(!prompt.includes('내가 쓴'), '프롬프트에 이미 있는 항목은 빠짐');
+    eq((prompt.match(/^\d+\. \[/gm) || []).length, 9, '프롬프트의 항목 수');
+  });
+
+  T('모든 항목에 세부사항이 있으면 AI를 부르지 않고 알려 준다', async (a) => {
+    await withExamples(a, 0);
+    await a.click(a.btn('AI 확인 기준'), 60);
+    await a.waitFor(() => a.state().items.every((i) => i.steps && i.steps.length));
+    await a.click(a.btn('AI 확인 기준'), 80);
+    eq(a.calls.filter((c) => c.kind === 'json').length, 1);
+    ok(/이미 세부사항이 있어요/.test(a.$('#aiNote').textContent));
+  });
+
+  T('AI 확인 기준이 실패해도 항목은 그대로이고 오류가 안내된다', async (a) => {
+    await withExamples(a, 0);
+    await a.click(a.btn('AI 확인 기준'), 150);
+    await a.waitFor(() => /다시 눌러 주세요|한도|허용|연결/.test(a.$('#aiNote').textContent));
+    ok(a.state().items.every((i) => !i.steps || !i.steps.length), '항목 변경 없음');
+    ok(!a.$('#aiStepsBtn').disabled, '버튼 다시 사용 가능');
+  }, { json: () => { throw { code: 'upstream_error' }; } });
+
+  T('간단히 보기에서는 곁가지 버튼이 숨고, 전체 보기에서 나타난다', async (a) => {
+    await withExamples(a, 1);
+    for (const id of ['#missBtn', '#tplBtn', '#bigBtn']) ok(!a.visible(a.$(id)), id + ' 숨김');
+    ok(!a.btn('체크했는데 빠뜨린 게 있었어요'), '항목의 빠뜨림 버튼 숨김');
+    ok(a.visible(a.$('#editBtn')), '편집은 그대로');
+    await a.click(a.$('#modeBtn'), 100);
+    for (const id of ['#missBtn', '#tplBtn', '#bigBtn']) ok(a.visible(a.$(id)), id + ' 표시');
+    ok(a.btn('체크했는데 빠뜨린 게 있었어요'), '항목의 빠뜨림 버튼 표시');
+    eq(a.win.localStorage.getItem('am_full'), '1', '선택 기억');
+  });
+
+  T('간단히 보기에서는 재확인에 타이머가 붙지 않는다', async (a) => {
+    await withExamples(a, 1);
+    await recheckOn(a, 0);
+    ok(!a.$('.timer'), '타이머 없음');
+    ok(!a.state().events.find((e) => e.type === 'recheck').timed, 'timed 아님');
+  });
+
+  T('전체 보기에서는 재확인에 타이머가 붙고 끝을 누르면 시간이 기록된다', async (a) => {
+    await withExamples(a, 1);
+    await recheckOn(a, 0);
+    ok(a.$('.timer'), '타이머');
+    await a.sleep(1100);
+    await a.click(a.btn('끝'), 100);
+    const ev = a.state().events.find((e) => e.type === 'recheck');
+    ok(typeof ev.sec === 'number' && ev.sec >= 1, '걸린 시간: ' + ev.sec);
+  }, { full: true });
+
+  T('하루 끝: 숫자가 맞고, 판정 단어 대신 약한 참고 문구가 나온다', async (a) => {
+    await withExamples(a, 4);
+    await recheckOn(a, 0);
+    await endDay(a);
+    const nums = a.$$('.num strong').map((s) => s.textContent);
+    eq(nums, ['4', '1', '1'], '총 체크 / 총 재확인 / 기록 후 재확인 항목');
+    const v = verdictText(a);
+    ok(/적은 편/.test(v), '적은 편: ' + v);
+    ok(!/지지|반증|판정/.test(v), '판정 단어 없음: ' + v);
+    ok(/하루치/.test(v), '단정 금지 문구');
+    ok(/참고 기준/.test(a.$('.sum').textContent), '기준 설명');
+    ok(!/판정|반증|지지는/.test(a.$('.sum').textContent), '요약 전체에 판정 단어 없음');
+  });
+
+  T('재확인이 중간이면 "보통", 많으면 "많은 편"이라고 약하게 말한다', async (a) => {
+    await withExamples(a, 6);
+    for (let i = 0; i < 3; i++) { await recheckOn(a, i); await recheckOn(a, i); }
+    await endDay(a);
+    ok(/보통/.test(verdictText(a)), '보통: ' + verdictText(a));
+    const b = await newApp();
+    await withExamples(b, 6);
+    for (let i = 0; i < 5; i++) await recheckOn(b, i);
+    await endDay(b);
+    ok(/많은 편/.test(verdictText(b)), '많은 편: ' + verdictText(b));
+    ok(!/지지|반증|판정/.test(verdictText(b)), '판정 단어 없음');
+  });
+
+  T('AI 개입을 끈 하루는 요약에 그렇게 적힌다', async (a) => {
+    await withExamples(a, 3);
+    await a.click(a.$('#aiBtn'), 80);
+    await endDay(a);
+    ok(/AI 개입 없이/.test(verdictText(a)), verdictText(a));
+  });
+
+  T('하루 끝 뒤에는 체크와 재확인이 잠기고, 새 하루를 시작할 수 있다', async (a) => {
+    await withExamples(a, 2);
+    await endDay(a);
+    ok(!a.$('.recheck'), '재확인 버튼 없음');
+    ok(a.$$('.item .box').every((b) => b.disabled), '체크 잠김');
+    await a.click(a.btn('새 하루 시작'), 200);
+    ok(/체크 0\/0/.test(a.$('#status').textContent), '새 하루');
+    ok([...a.store.keys()].some((k) => k.includes('/day-')), '지난 하루 보관');
+  });
+
+  T('기록 패널: 지난 하루와 오늘이 날짜별 표로 나온다', async (a) => {
+    await withExamples(a, 6);
+    await recheckOn(a, 0);
+    await endDay(a);
+    await a.click(a.btn('새 하루 시작'), 200);
+    await a.click(a.btn('기록'), 300);
+    await a.waitFor(() => a.$$('#histPanel tbody tr').length >= 2);
+    const rows = a.$$('#histPanel tbody tr').map((r) => r.textContent);
+    ok(rows.length >= 2, '행 수: ' + rows.length);
+    ok(rows.some((r) => /6\/10/.test(r)), '지난 하루의 체크 수');
+    ok(!/지지|반증/.test(a.$('#histPanel').textContent), '판정 단어 없음');
+  });
+
+  T('새로 열어도 저장된 하루가 이어진다 (읽기 전용 문서도 문제없음)', async (a) => {
+    await withExamples(a, 2);
+    await a.click(a.btn('AI 확인 기준'), 60);
+    await a.waitFor(() => a.state().items.every((i) => i.steps && i.steps.length));
+    const b = await newApp({ store: a.store });
+    eq(b.$$('.item').length, 10, '항목 수');
+    ok(/체크 2\/10/.test(b.$('#status').textContent), '체크 수: ' + b.$('#status').textContent);
+    await b.typeEnter(b.newItem(), '새로 연 뒤에 추가');
+    eq(b.$$('.item').length, 11, '읽기 전용 문서에서도 추가됨');
+    await b.click(b.$$('.item .box:not(:disabled)')[0], 80);
+    ok(/체크 3\/11/.test(b.$('#status').textContent), '체크도 됨');
+  });
+
+  T('빠뜨림 기록: 패널에서 추가하고, 항목에서 바로 기록·취소할 수 있다', async (a) => {
+    await withExamples(a, 1);
+    await a.click(a.$('#missBtn'), 100);
+    a.$('#missText').value = '첨부파일 누락';
+    await a.click(a.$('#missAdd'), 150);
+    ok(a.$$('#missList li').some((l) => /첨부파일 누락/.test(l.textContent)), '목록');
+    await a.click(a.btn('체크했는데 빠뜨린 게 있었어요'), 120);
+    ok(a.btn('빠뜨림 기록됨 (취소)'), '항목에서 기록됨');
+    await a.click(a.btn('빠뜨림 기록됨 (취소)'), 120);
+    ok(a.btn('체크했는데 빠뜨린 게 있었어요'), '취소됨');
+  }, { full: true });
+
+  const dayIso = (n) => { const d = new Date(Date.now() + n * 86400000); d.setHours(23, 59, 0, 0); return d.toISOString(); };
+  const postings = () => {
+    const s = new Map();
+    const put = (id, o) => s.set('postings/' + id, Object.assign({ edu: '대학교(4년)↑', empType: '정규직', apply: '입사지원', career: '경력무관', loc: '서울', status: 'open' }, o));
+    put('p1', { company: '가까운식품', title: '생산관리', deadlineAt: dayIso(2), deadlineLabel: '곧 마감', recIdx: '1' });
+    put('p2', { company: '먼식품', title: '품질관리', deadlineAt: dayIso(20), deadlineLabel: '나중 마감', recIdx: '2' });
+    put('p3', { company: '상시식품', title: '생산직', deadlineAt: null, deadlineLabel: '상시채용', status: 'ongoing', recIdx: '3' });
+    s.set('meta/postings', { asOf: new Date().toISOString() });
+    return s;
+  };
+  T('공고 목록: 임박 공고가 먼저 나오고 강조되며, 지원 완료를 누르면 빠진다', async (a) => {
+    await a.click(a.btn('예시 항목 10개 넣기'), 150);
+    await a.waitFor(() => a.$('.ptog'));
+    ok(/가까운식품/.test(a.$('.ptog .sub').textContent), '접힌 줄의 가장 가까운 마감: ' + a.$('.ptog .sub').textContent);
+    await a.click(a.$('.ptog'), 100);
+    const imminent = a.$$('.pl')[0].textContent;
+    ok(/가까운식품/.test(imminent) && !/먼식품/.test(imminent), '5일 이내만 위에');
+    ok(a.$('.pl .dd.hot'), 'D-3 이하는 강조');
+    await a.click(a.btn('지원 완료'), 120);
+    await a.waitFor(() => !/가까운식품/.test(a.$$('.pl')[0].textContent));
+    ok(/내가 처리한 공고 1건/.test(a.$('.posts').textContent), '처리한 공고 묶음');
+    ok(/먼식품/.test(a.$('.posts').textContent), '다른 공고는 그대로');
+  }, { store: postings() });
+
+  T('AI를 쓸 수 없는 환경에서는 AI 버튼이 숨고 이유가 상태 줄에 나온다', async (a) => {
+    await withExamples(a, 1);
+    ok(!a.visible(a.$('#aiBtn')) && !a.visible(a.$('#aiStepsBtn')), 'AI 버튼 숨김');
+    ok(/AI 사용 불가/.test(a.$('#status').textContent), '안내');
+    await recheckOn(a, 0);
+    eq(a.state().events.filter((e) => e.type === 'recheck').length, 1, 'AI 없이도 재확인은 기록');
+  }, { sample: null });
+
+  T('키보드: j로 고르고 x로 체크, r로 다시 확인', async (a) => {
+    await withExamples(a, 0);
+    await a.key('j'); await a.key('x');
+    ok(/체크 1\/10/.test(a.$('#status').textContent), '체크');
+    await a.key('r');
+    eq(a.state().events.filter((e) => e.type === 'recheck').length, 1, '재확인');
+  });
+
+  T('항목 편집: 수정하면 글이 바뀌고 체크 기록은 그대로다', async (a) => {
+    await withExamples(a, 1);
+    await a.click(a.$('#editBtn'), 80);
+    await a.click(a.btn('수정'), 80);
+    await a.typeEnter(a.$('#editInput'), '바뀐 첫 항목');
+    eq(a.state().items[0].text, '바뀐 첫 항목');
+    ok(a.state().events.some((e) => e.type === 'check'), '체크 기록 유지');
+  });
+
+  // ── 실행 ──
+  let pass = 0, fail = 0;
+  for (const t of tests) {
+    const li = document.createElement('li');
+    let a = null;
+    try {
+      a = await newApp(t.opts);
+    } catch (e) { /* 아래에서 처리 */ }
+    try {
+      await t.fn(a);
+      pass++; li.className = 'ok'; li.textContent = '통과 ' + t.name;
+    } catch (e) {
+      fail++; li.className = 'bad'; li.textContent = '실패 ' + t.name + ' — ' + (e && e.message ? e.message : e);
+    }
+    out.appendChild(li);
+    if (a && a.iframe) a.iframe.remove();
+  }
+  const s = document.getElementById('summary');
+  s.textContent = fail === 0 ? '전체 통과 (' + pass + '건)' : '실패 ' + fail + '건 / 통과 ' + pass + '건';
+  s.className = fail === 0 ? 'ok' : 'bad';
+  document.title = (fail === 0 ? 'PASS ' : 'FAIL ') + pass + '/' + (pass + fail);
+})();
+</script>
+</body>
+</html>
