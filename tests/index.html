@@ -393,6 +393,17 @@
     eq(a.state().events.filter((e) => e.type === 'recheck').length, 1, 'AI 없이도 재확인은 기록');
   }, { sample: null });
 
+  T('AI를 쓸 수 없는 환경에서도 세부사항을 직접 쓰고 지우고 체크할 수 있다', async (a) => {
+    await withExamples(a, 0);
+    await a.click(a.btn('+ 세부사항'), 80);
+    await a.typeEnter(a.$('[data-stepinput]'), 'AI 없이 쓴 세부사항');
+    eq(a.state().items[0].steps.map((s) => s.text), ['AI 없이 쓴 세부사항']);
+    await a.click(a.$$('.item')[0].querySelector('.step'), 80);
+    ok(a.state().events.some((e) => e.type === 'step'), '체크');
+    await a.click(a.$$('.item')[0].querySelector('.sdel'), 80);
+    eq(a.state().items[0].steps.length, 0, '지움');
+  }, { sample: null });
+
   T('키보드: j로 고르고 x로 체크, r로 다시 확인', async (a) => {
     await withExamples(a, 0);
     await a.key('j'); await a.key('x');
